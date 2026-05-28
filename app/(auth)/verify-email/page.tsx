@@ -25,7 +25,19 @@ function VerifyEmailContent() {
     return () => clearInterval(id)
   }, [cooldown])
 
-  const verified = searchParams.get("verified") === "true"
+  const verified = searchParams.get("verified")
+  const isVerified = verified === "true"
+  const isInvalid = verified === "invalid"
+  const [redirectCountdown, setRedirectCountdown] = useState(10)
+
+  useEffect(() => {
+    if (!isVerified || redirectCountdown <= 0) return
+    if (redirectCountdown === 10) {
+      setTimeout(() => router.push("/dashboard"), 10000)
+    }
+    const id = setInterval(() => setRedirectCountdown((c) => c - 1), 1000)
+    return () => clearInterval(id)
+  }, [isVerified, redirectCountdown, router])
 
   async function handleResend() {
     if (!session?.accessToken) {
@@ -63,7 +75,7 @@ function VerifyEmailContent() {
         <h1 className="text-xl font-bold">Email Verification</h1>
       </div>
 
-      {verified ? (
+      {isVerified ? (
         <div className="flex flex-col items-center gap-4">
           <div className="flex size-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">
             <CheckCircle2Icon className="size-6" />
@@ -71,9 +83,32 @@ function VerifyEmailContent() {
           <p className="text-sm text-muted-foreground">
             Your email has been verified successfully!
           </p>
+          <p className="text-xs text-muted-foreground">
+            Redirecting to dashboard in {redirectCountdown}s...
+          </p>
           <Button onClick={() => router.push("/dashboard")}>
-            Go to Dashboard
+            Go to Dashboard Now
           </Button>
+        </div>
+      ) : isInvalid ? (
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+            <GalleryVerticalEnd className="size-6" />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Invalid or expired verification link. Please request a new one.
+          </p>
+          {session?.accessToken && (
+            <Button variant="outline" onClick={handleResend} disabled={sending}>
+              {sending ? "Sending..." : "Resend Verification Email"}
+            </Button>
+          )}
+          <Link
+            href="/signin"
+            className="text-xs text-muted-foreground hover:text-primary"
+          >
+            Back to sign in
+          </Link>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-4">

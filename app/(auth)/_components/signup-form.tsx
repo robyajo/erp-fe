@@ -1,6 +1,6 @@
 "use client"
 
-import { GalleryVerticalEnd } from "lucide-react"
+import { GalleryVerticalEnd, Loader2Icon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -184,7 +184,10 @@ export function SignupForm({
             )}
           </Field>
           <Field>
-            <Button type="submit">Create Account</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting && <Loader2Icon className="size-4 animate-spin" />}
+              Create Account
+            </Button>
           </Field>
           <FieldSeparator>Or</FieldSeparator>
           <Field className="grid gap-4">
