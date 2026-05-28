@@ -8,3 +8,4 @@
 [2026-05-29 02:00] DONE Added resend button with 60s countdown to forgot-password and verify-email pages
 [2026-05-29 02:05] DONE Fixed NavUser avatar display — Changed user?.displayName to user?.name, fixed button-google redirect URL
 [2026-05-29 02:10] DONE Updated redirect flows — Manual signup → /verify-email, Google OAuth → /dashboard
+[2026-05-29 03:00] DONE Added token refresh in NextAuth jwt callback — Calls /api/v1/refresh 5min before expiry, new token valid 24h

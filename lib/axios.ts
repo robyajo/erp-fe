@@ -63,6 +63,10 @@ if (typeof window !== "undefined") {
       } catch (refreshError) {
         pendingRequests.forEach((p) => p.reject(refreshError))
         pendingRequests = []
+        const { triggerSessionExpired } = await import(
+          "@/components/session-expired-dialog"
+        )
+        triggerSessionExpired()
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false

@@ -35,6 +35,28 @@ declare module "next-auth/jwt" {
   interface JWT {
     accessToken: string
     user: AppUser
+    expiresAt: number
+  }
+}
+
+async function refreshAccessToken(token: JWT): Promise<JWT> {
+  try {
+    const res = await axios.post<AuthResponse<{
+      tokens: { accessToken: string; refreshToken: string }
+    }>>("/api/v1/refresh", {}, {
+      headers: { Authorization: `Bearer ${token.accessToken}` },
+    })
+
+    if (res.data?.success && res.data?.data?.tokens?.accessToken) {
+      return {
+        ...token,
+        accessToken: res.data.data.tokens.accessToken,
+        expiresAt: Math.floor(Date.now() / 1000) + 86400,
+      }
+    }
+    return { ...token, expiresAt: 0 }
+  } catch {
+    return { ...token, expiresAt: 0 }
   }
 }
 
@@ -172,6 +194,7 @@ export const authOptions: AuthOptions = {
       if (user) {
         const u = user as User
         token.accessToken = u.accessToken
+        token.expiresAt = Math.floor(Date.now() / 1000) + 86400
         token.user = {
           id: u.id,
           name: u.name,
@@ -185,6 +208,10 @@ export const authOptions: AuthOptions = {
           createdAt: u.createdAt,
           updatedAt: u.updatedAt,
         }
+      }
+
+      if (token.expiresAt && Date.now() >= (token.expiresAt - 300) * 1000) {
+        return refreshAccessToken(token)
       }
 
       return token

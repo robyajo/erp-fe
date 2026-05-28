@@ -7,6 +7,7 @@ import { createMetadata } from "@/lib/metadata"
 import ErrorBoundary from "@/providers/error-boundary"
 import { Providers } from "@/providers"
 import { Toaster } from "@/components/ui/sonner"
+import { SessionExpiredDialog } from "@/components/session-expired-dialog"
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -82,6 +83,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <Providers>{children}</Providers>
         </ErrorBoundary>
+        <SessionExpiredDialog />
         <Toaster />
       </body>
     </html>
