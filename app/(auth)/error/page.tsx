@@ -12,27 +12,18 @@ function AuthErrorContent() {
   const searchParams = useSearchParams()
   const errorType = searchParams.get("error")
 
-  // Map NextAuth error types to user-friendly messages
   let errorMessage =
     "An unexpected authentication error occurred. Please try again."
   let errorTitle = "Authentication Failed"
 
-  if (errorType === "Configuration") {
-    errorTitle = "Server Configuration Error"
+  if (errorType === "CredentialsSignin") {
+    errorTitle = "Invalid Credentials"
     errorMessage =
-      "There is a problem with the server configuration. Please contact support or check back later."
+      "Invalid email or password. Please double-check your credentials and try again."
   } else if (errorType === "AccessDenied") {
     errorTitle = "Access Denied"
     errorMessage =
       "Access was denied. You may not have permission to sign in, or your account might be inactive."
-  } else if (errorType === "Verification") {
-    errorTitle = "Verification Token Expired"
-    errorMessage =
-      "The authentication token is invalid or has expired. Please request a new login link."
-  } else if (errorType === "CredentialsSignin") {
-    errorTitle = "Invalid Credentials"
-    errorMessage =
-      "Invalid username or password. Please double-check your credentials and try again."
   }
 
   return (

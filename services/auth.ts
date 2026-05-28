@@ -6,8 +6,6 @@ import type {
   RegisterRequest,
   RegisterData,
   RefreshData,
-  UpdateProfileRequest,
-  ChangePasswordRequest,
   ForgotPasswordRequest,
   ResetPasswordRequest,
   User,
@@ -16,10 +14,7 @@ import type {
 export async function login(
   data: LoginRequest
 ): Promise<AuthResponse<LoginData>> {
-  const res = await axios.post<AuthResponse<LoginData>>(
-    "/api/v1/auth/login",
-    data
-  )
+  const res = await axios.post<AuthResponse<LoginData>>("/api/v1/login", data)
   return res.data
 }
 
@@ -27,50 +22,25 @@ export async function register(
   data: RegisterRequest
 ): Promise<AuthResponse<RegisterData>> {
   const res = await axios.post<AuthResponse<RegisterData>>(
-    "/api/v1/auth/register",
+    "/api/v1/register",
     data
   )
   return res.data
 }
 
-export async function refreshToken(
-  refreshToken: string
-): Promise<AuthResponse<RefreshData>> {
-  const res = await axios.post<AuthResponse<RefreshData>>(
-    "/api/v1/auth/refresh",
-    { refreshToken }
-  )
-  return res.data
-}
-
 export async function getMe(accessToken: string): Promise<AuthResponse<User>> {
-  const res = await axios.get<AuthResponse<User>>("/api/v1/auth/me", {
+  const res = await axios.get<AuthResponse<User>>("/api/v1/me", {
     headers: { Authorization: `Bearer ${accessToken}` },
   })
   return res.data
 }
 
-export async function updateProfile(
-  accessToken: string,
-  data: UpdateProfileRequest
-): Promise<AuthResponse<User>> {
-  const res = await axios.patch<AuthResponse<User>>(
-    "/api/v1/auth/profile",
-    data,
-    {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    }
-  )
-  return res.data
-}
-
-export async function changePassword(
-  accessToken: string,
-  data: ChangePasswordRequest
-): Promise<AuthResponse<{ message: string }>> {
-  const res = await axios.post<AuthResponse<{ message: string }>>(
-    "/api/v1/auth/change-password",
-    data,
+export async function refreshToken(
+  accessToken: string
+): Promise<AuthResponse<RefreshData>> {
+  const res = await axios.post<AuthResponse<RefreshData>>(
+    "/api/v1/refresh",
+    {},
     {
       headers: { Authorization: `Bearer ${accessToken}` },
     }
@@ -82,7 +52,7 @@ export async function forgotPassword(
   data: ForgotPasswordRequest
 ): Promise<AuthResponse<{ message: string }>> {
   const res = await axios.post<AuthResponse<{ message: string }>>(
-    "/api/v1/auth/forgot-password",
+    "/api/v1/forgot-password",
     data
   )
   return res.data
@@ -92,18 +62,19 @@ export async function resetPassword(
   data: ResetPasswordRequest
 ): Promise<AuthResponse<{ message: string }>> {
   const res = await axios.post<AuthResponse<{ message: string }>>(
-    "/api/v1/auth/reset-password",
+    "/api/v1/reset-password",
     data
   )
   return res.data
 }
 
-export async function sendVerification(
-  accessToken: string
+export async function resendVerification(
+  accessToken: string,
+  email: string
 ): Promise<AuthResponse<{ message: string }>> {
   const res = await axios.post<AuthResponse<{ message: string }>>(
-    "/api/v1/auth/send-verification",
-    {},
+    "/api/v1/email/resend",
+    { email },
     {
       headers: { Authorization: `Bearer ${accessToken}` },
     }
@@ -112,24 +83,10 @@ export async function sendVerification(
 }
 
 export async function logout(
-  accessToken: string,
-  refreshToken: string
-): Promise<AuthResponse<{ message: string }>> {
-  const res = await axios.post<AuthResponse<{ message: string }>>(
-    "/api/v1/auth/logout",
-    { refreshToken },
-    {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    }
-  )
-  return res.data
-}
-
-export async function logoutAll(
   accessToken: string
-): Promise<AuthResponse<{ message: string }>> {
-  const res = await axios.post<AuthResponse<{ message: string }>>(
-    "/api/v1/auth/logout-all",
+): Promise<AuthResponse<null>> {
+  const res = await axios.post<AuthResponse<null>>(
+    "/api/v1/logout",
     {},
     {
       headers: { Authorization: `Bearer ${accessToken}` },

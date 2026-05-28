@@ -41,17 +41,15 @@ export function SignupForm({
   async function onSubmit(data: SignupInput) {
     try {
       const res = await registerUser({
-        username: data.username,
+        name: data.name,
         email: data.email,
         password: data.password,
-        confirmPassword: data.confirmPassword,
-        displayName: data.displayName || undefined,
+        password_confirmation: data.password_confirmation,
       })
 
       if (res.success) {
         const signInResult = await signIn("credentials", {
-          accessToken: res.data.tokens.accessToken,
-          refreshToken: res.data.tokens.refreshToken,
+          token: res.data.token,
           redirect: false,
         })
 
@@ -62,8 +60,8 @@ export function SignupForm({
 
         sessionStorage.clear()
 
-        toast.success("Account created successfully!")
-        router.push("/dashboard")
+        toast.success("Account created successfully! Please verify your email.")
+        router.push("/verify-email")
         router.refresh()
       }
     } catch (err: unknown) {
@@ -72,11 +70,10 @@ export function SignupForm({
 
       if (serverErrors) {
         const fieldMap: Record<string, keyof SignupInput> = {
-          username: "username",
+          name: "name",
           email: "email",
           password: "password",
-          confirmPassword: "confirmPassword",
-          displayName: "displayName",
+          password_confirmation: "password_confirmation",
         }
 
         for (const [field, messages] of Object.entries(serverErrors)) {
@@ -123,34 +120,18 @@ export function SignupForm({
             )}
           </div>
           <Field>
-            <FieldLabel htmlFor="username">Username</FieldLabel>
+            <FieldLabel htmlFor="name">Name</FieldLabel>
             <Input
-              id="username"
-              type="text"
-              placeholder="john_doe"
-              required
-              {...register("username")}
-              disabled={isSubmitting}
-            />
-            {errors.username && (
-              <span className="font-mono text-[10px] text-destructive">
-                {errors.username.message}
-              </span>
-            )}
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="displayName">Display Name</FieldLabel>
-            <Input
-              id="displayName"
+              id="name"
               type="text"
               placeholder="John Doe"
               required
-              {...register("displayName")}
+              {...register("name")}
               disabled={isSubmitting}
             />
-            {errors.displayName && (
+            {errors.name && (
               <span className="font-mono text-[10px] text-destructive">
-                {errors.displayName.message}
+                {errors.name.message}
               </span>
             )}
           </Field>
@@ -187,18 +168,18 @@ export function SignupForm({
             )}
           </Field>
           <Field>
-            <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
+            <FieldLabel htmlFor="password_confirmation">Confirm Password</FieldLabel>
             <Input
-              id="confirmPassword "
+              id="password_confirmation"
               type="password"
               placeholder="••••••••"
               required
-              {...register("confirmPassword")}
+              {...register("password_confirmation")}
               disabled={isSubmitting}
             />
-            {errors.confirmPassword && (
+            {errors.password_confirmation && (
               <span className="font-mono text-[10px] text-destructive">
-                {errors.confirmPassword.message}
+                {errors.password_confirmation.message}
               </span>
             )}
           </Field>

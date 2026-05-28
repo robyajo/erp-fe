@@ -7,8 +7,8 @@ export default function ButtonGoogle() {
     <Button
       variant="outline"
       type="button"
-      onClick={() => {
-        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google`
+     onClick={() => {
+        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google/redirect`
       }}
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

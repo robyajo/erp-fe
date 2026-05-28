@@ -1,10 +1,7 @@
 import { z } from "zod"
 
 export const signinSchema = z.object({
-  username: z
-    .string()
-    .min(1, "Email or username is required")
-    .max(50, "Too long"),
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
   password: z.string().min(1, "Password is required").max(128, "Too long"),
 })
 
@@ -12,32 +9,20 @@ export type SigninInput = z.infer<typeof signinSchema>
 
 export const signupSchema = z
   .object({
-    username: z
-      .string()
-      .min(3, "Username must be at least 3 characters")
-      .max(50, "Username must be at most 50 characters")
-      .regex(
-        /^[a-zA-Z0-9_]+$/,
-        "Username can only contain letters, numbers, and underscores"
-      ),
+    name: z.string().min(1, "Name is required").max(255, "Too long"),
     email: z
       .string()
       .min(1, "Email is required")
       .email("Invalid email address"),
-    displayName: z
-      .string()
-      .max(100, "Display name must be at most 100 characters")
-      .optional()
-      .or(z.literal("")),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters")
       .max(128, "Password must be at most 128 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
+    password_confirmation: z.string().min(1, "Please confirm your password"),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((data) => data.password === data.password_confirmation, {
     message: "Passwords do not match",
-    path: ["confirmPassword"],
+    path: ["password_confirmation"],
   })
 
 export type SignupInput = z.infer<typeof signupSchema>

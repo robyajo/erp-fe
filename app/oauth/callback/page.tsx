@@ -20,7 +20,6 @@ function CallbackContent() {
   useEffect(() => {
     async function handleCallback() {
       const accessToken = searchParams.get("accessToken")
-      const refreshToken = searchParams.get("refreshToken")
       const errorParam = searchParams.get("error")
 
       if (errorParam) {
@@ -28,17 +27,16 @@ function CallbackContent() {
         return
       }
 
-      if (!accessToken || !refreshToken) {
+      if (!accessToken) {
         setStatus("error")
-        setMessage("Invalid callback: missing authentication tokens.")
+        setMessage("Invalid callback: missing authentication token.")
         toast.error("Invalid callback")
         return
       }
 
       try {
         const result = await signIn("credentials", {
-          accessToken,
-          refreshToken,
+          token: accessToken,
           redirect: false,
         })
 
@@ -52,7 +50,7 @@ function CallbackContent() {
         sessionStorage.clear()
 
         setStatus("success")
-        setMessage("Login successful! Redirecting to dashboard...")
+        setMessage("Login successful! Redirecting...")
         toast.success("Logged in successfully!")
         setTimeout(() => router.push("/dashboard"), 1000)
       } catch {

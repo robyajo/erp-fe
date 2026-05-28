@@ -51,7 +51,7 @@ export function NavUser() {
 
   const user = session?.data?.user
 
-  const displayName = user?.displayName || user?.username || "User"
+  const displayName = user?.name || "User"
   const email = user?.email || ""
   const avatarUrl = user?.avatarUrl || ""
   const initials = getInitials(displayName)

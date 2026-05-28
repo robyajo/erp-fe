@@ -38,7 +38,7 @@ export function SigninForm({
   async function onSubmit(data: SigninInput) {
     try {
       const result = await signIn("credentials", {
-        username: data.username,
+        email: data.email,
         password: data.password,
         redirect: false,
       })
@@ -81,18 +81,18 @@ export function SigninForm({
             )}
           </div>
           <Field>
-            <FieldLabel htmlFor="username"> Email or Username</FieldLabel>
+            <FieldLabel htmlFor="email">Email</FieldLabel>
             <Input
-              id="username"
-              type="text"
+              id="email"
+              type="email"
               placeholder="m@example.com"
               required
-              {...register("username")}
+              {...register("email")}
               disabled={isSubmitting}
             />
-            {errors.username && (
+            {errors.email && (
               <span className="font-mono text-[10px] text-destructive">
-                {errors.username.message}
+                {errors.email.message}
               </span>
             )}
           </Field>

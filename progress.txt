@@ -4,3 +4,7 @@
 # [YYYY-MM-DD HH:MM] <status> <task> — <detail>
 # Status: START | DONE | BLOCKED | CANCEL
 
+[2026-05-29 01:41] DONE Adapt auth to match erp-be backend — Updated types, services, forms, NextAuth options, and created missing pages
+[2026-05-29 02:00] DONE Added resend button with 60s countdown to forgot-password and verify-email pages
+[2026-05-29 02:05] DONE Fixed NavUser avatar display — Changed user?.displayName to user?.name, fixed button-google redirect URL
+[2026-05-29 02:10] DONE Updated redirect flows — Manual signup → /verify-email, Google OAuth → /dashboard
