@@ -1,4 +1,11 @@
 import { Button } from "@/components/ui/button"
+import { Metadata } from "next"
+import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "My Blog",
+  description: "...",
+}
 
 export default function Page() {
   return (
@@ -9,6 +16,16 @@ export default function Page() {
           <p>You may now add components and start building.</p>
           <p>We&apos;ve already added the button component for you.</p>
           <Button className="mt-2">Button</Button>
+
+          <div className="mt-4 flex gap-4">
+            <Link href="/signin" className="text-sm text-primary">
+              Sign In
+            </Link>
+            <span className="mx-2 text-muted-foreground">or</span>
+            <Link href="/signup" className="text-sm text-primary">
+              Sign Up
+            </Link>
+          </div>
         </div>
         <div className="font-mono text-xs text-muted-foreground">
           (Press <kbd>d</kbd> to toggle dark mode)
