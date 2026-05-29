@@ -1,5 +1,7 @@
 "use client"
 
+import * as React from "react"
+import { usePathname } from "next/navigation"
 import {
   Collapsible,
   CollapsibleContent,
@@ -7,13 +9,13 @@ import {
 } from "@/components/ui/collapsible"
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { ChevronRightIcon } from "lucide-react"
 
@@ -28,12 +30,21 @@ export function NavMain({
     items?: {
       title: string
       url: string
+      icon?: React.ReactNode
     }[]
   }[]
 }) {
+  const pathname = usePathname()
+  const { state } = useSidebar()
+  const isCollapsed = state === "collapsed"
+
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible
@@ -46,19 +57,33 @@ export function NavMain({
               render={<SidebarMenuButton tooltip={item.title} />}
             >
               {item.icon}
-              <span>{item.title}</span>
-              <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90" />
+              {!isCollapsed && <span>{item.title}</span>}
+              {!isCollapsed && (
+                <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90" />
+              )}
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <SidebarMenuSub>
-                {item.items?.map((subItem) => (
-                  <SidebarMenuSubItem key={subItem.title}>
-                    <SidebarMenuSubButton render={<a href={subItem.url} />}>
-                      <span>{subItem.title}</span>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                ))}
-              </SidebarMenuSub>
+              {!isCollapsed && (
+                <SidebarMenuSub>
+                  {item.items?.map((subItem) => {
+                    const isSubItemActive = mounted
+                      ? pathname === subItem.url || (pathname + window.location.search) === subItem.url
+                      : pathname === subItem.url
+
+                    return (
+                      <SidebarMenuSubItem key={subItem.title}>
+                        <SidebarMenuSubButton
+                          isActive={isSubItemActive}
+                          render={<a href={subItem.url} />}
+                        >
+                          {subItem.icon}
+                          <span>{subItem.title}</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    )
+                  })}
+                </SidebarMenuSub>
+              )}
             </CollapsibleContent>
           </Collapsible>
         ))}
