@@ -103,7 +103,8 @@ export function Header() {
 
   const store = usePluginStore.getState()
   const apps = allApps.filter(
-    (app) => app.requiresPlugin === null || store.isInstalled(app.requiresPlugin),
+    (app) =>
+      app.requiresPlugin === null || store.isInstalled(app.requiresPlugin)
   )
 
   // Detect current active module
@@ -119,9 +120,9 @@ export function Header() {
       ? "blog"
       : isContacts
         ? "contacts"
-      : isSettings
-        ? "settings"
-        : null
+        : isSettings
+          ? "settings"
+          : null
 
   const pluginMenu = activeModule
     ? usePluginStore.getState().getPluginMenu(activeModule)
@@ -141,40 +142,47 @@ export function Header() {
       return pathname === "/inventory/operations" || pathname === "/inventory"
     }
     if (itemHref === "/inventory/categories") {
-      return pathname === "/inventory/categories" || pathname === "/inventory/warehouses"
+      return (
+        pathname === "/inventory/categories" ||
+        pathname === "/inventory/warehouses"
+      )
     }
     return pathname === itemHref
   }
 
-  const activeNavItem = headerNav.find((item) => getIsActive(item.href)) || headerNav[0]
+  // const activeNavItem = headerNav.find((item) => getIsActive(item.href)) || headerNav[0]
 
   return (
-    <header className="flex h-16 w-full shrink-0 items-center justify-between border-b bg-background px-4 z-50">
+    <header className="z-50 flex h-16 w-full shrink-0 items-center justify-between border-b bg-background px-4">
       {/* Left section: Launcher, Logo, Module Title & Nav */}
       <div className="flex items-center">
         {/* Left inner wrapper */}
-        <div className="flex items-center gap-3 md:w-[208px] shrink-0">
+        <div className="flex shrink-0 items-center gap-3 md:w-[208px]">
           {/* Launcher Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <button className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors outline-none cursor-pointer">
+                <button className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-foreground">
                   <LayoutGrid className="h-5 w-5" />
                 </button>
               }
             />
-            <DropdownMenuContent className="w-[320px] p-4" align="start" sideOffset={8}>
+            <DropdownMenuContent
+              className="w-[320px] p-4"
+              align="start"
+              sideOffset={8}
+            >
               <div className="grid grid-cols-3 gap-3">
                 {apps.map((app) => (
                   <Link
                     key={app.name}
                     href={app.href}
-                    className="flex flex-col items-center justify-center p-3 rounded-2xl bg-card border border-zinc-100 dark:border-zinc-800 shadow-xs hover:shadow-md hover:bg-accent/50 transition-all duration-200 group text-center"
+                    className="group flex flex-col items-center justify-center rounded-2xl border border-zinc-100 bg-card p-3 text-center shadow-xs transition-all duration-200 hover:bg-accent/50 hover:shadow-md dark:border-zinc-800"
                   >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted group-hover:scale-105 transition-transform duration-200">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted transition-transform duration-200 group-hover:scale-105">
                       {app.icon}
                     </div>
-                    <span className="mt-2 text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 truncate w-full">
+                    <span className="mt-2 w-full truncate text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
                       {app.label}
                     </span>
                   </Link>
@@ -184,21 +192,21 @@ export function Header() {
           </DropdownMenu>
 
           {/* Custom Premium Logo */}
-          <div className="hidden md:flex size-7 items-center justify-center rounded-lg bg-linear-to-tr from-blue-600 to-indigo-500 text-white font-bold text-sm shadow-md shadow-blue-500/20">
+          <div className="hidden size-7 items-center justify-center rounded-lg bg-linear-to-tr from-blue-600 to-indigo-500 text-sm font-bold text-white shadow-md shadow-blue-500/20 md:flex">
             M
           </div>
 
           {/* Module Title */}
-          <span className="hidden md:block text-sm font-bold tracking-tight text-foreground select-none">
+          <span className="hidden text-sm font-bold tracking-tight text-foreground select-none md:block">
             {activeTitle}
           </span>
         </div>
 
         {/* Separator & Sub Navigation (Desktop only) */}
         {headerNav.length > 0 && (
-          <div className="hidden md:flex items-center">
+          <div className="hidden items-center md:flex">
             <Separator orientation="vertical" className="h-4" />
-            <nav className="flex items-center gap-1.5 ml-3">
+            <nav className="ml-3 flex items-center gap-1.5">
               {headerNav.map((item) => {
                 const isActive = getIsActive(item.href)
 
@@ -208,7 +216,7 @@ export function Header() {
                     href={item.href}
                     className={cn(
                       "inline-flex h-8 items-center rounded-lg px-3 text-xs font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground",
-                      isActive && "bg-accent text-foreground",
+                      isActive && "bg-accent text-foreground"
                     )}
                   >
                     {item.label}
@@ -221,31 +229,31 @@ export function Header() {
       </div>
 
       {/* Center section: Search Input (Mobile only) */}
-      <div className="flex-1 flex justify-center max-w-sm mx-2 md:hidden">
+      <div className="mx-2 flex max-w-sm flex-1 justify-center md:hidden">
         <div className="relative w-full">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search..."
-            className="flex h-9 w-full rounded-md border border-input bg-background px-3 pl-9 py-1 text-sm transition-colors placeholder:text-muted-foreground/75 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 pl-9 text-sm transition-colors placeholder:text-muted-foreground/75 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
           />
         </div>
       </div>
 
       {/* Right section: Notifications, Avatar */}
-      <div className="flex items-center gap-2 md:gap-3 shrink-0">
+      <div className="flex shrink-0 items-center gap-2 md:gap-3">
         {/* Search Input (Desktop only) */}
-        <div className="hidden md:block relative w-40 lg:w-60">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className="relative hidden w-40 md:block lg:w-60">
+          <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search..."
-            className="flex h-9 w-full rounded-md border border-input bg-background px-3 pl-9 py-1 text-sm transition-colors placeholder:text-muted-foreground/75 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 pl-9 text-sm transition-colors placeholder:text-muted-foreground/75 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
           />
         </div>
 
         {/* Notification Bell */}
-        <button className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors outline-none cursor-pointer">
+        <button className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-foreground">
           <Bell className="h-4.5 w-4.5" />
         </button>
 
@@ -253,10 +261,10 @@ export function Header() {
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <button className="flex size-8 items-center justify-center rounded-full outline-none cursor-pointer hover:ring-2 hover:ring-ring/20 transition-all">
+              <button className="flex size-8 cursor-pointer items-center justify-center rounded-full transition-all outline-none hover:ring-2 hover:ring-ring/20">
                 <Avatar className="size-8">
                   <AvatarImage src={avatarUrl} alt={displayName} />
-                  <AvatarFallback className="bg-zinc-800 text-white font-semibold text-xs">
+                  <AvatarFallback className="bg-zinc-800 text-xs font-semibold text-white">
                     {initials || "U"}
                   </AvatarFallback>
                 </Avatar>
@@ -269,30 +277,43 @@ export function Header() {
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="size-8">
                     <AvatarImage src={avatarUrl} alt={displayName} />
-                    <AvatarFallback className="bg-zinc-800 text-white font-semibold text-xs">
+                    <AvatarFallback className="bg-zinc-800 text-xs font-semibold text-white">
                       {initials || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-xs leading-tight">
-                    <span className="truncate font-semibold">{displayName}</span>
-                    <span className="truncate text-muted-foreground">{email}</span>
+                    <span className="truncate font-semibold">
+                      {displayName}
+                    </span>
+                    <span className="truncate text-muted-foreground">
+                      {email}
+                    </span>
                   </div>
                 </div>
               </DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => router.push("/dashboard/account")} className="cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => router.push("/dashboard/account")}
+                className="cursor-pointer"
+              >
                 <User className="mr-2 h-4 w-4 text-muted-foreground" />
                 <span>My Account</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/dashboard/billing")} className="cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => router.push("/dashboard/billing")}
+                className="cursor-pointer"
+              >
                 <CreditCard className="mr-2 h-4 w-4 text-muted-foreground" />
                 <span>Billing</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 cursor-pointer">
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="cursor-pointer text-red-600 focus:text-red-600"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log Out</span>
             </DropdownMenuItem>

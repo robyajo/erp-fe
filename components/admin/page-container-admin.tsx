@@ -205,7 +205,7 @@ export default function PageContainerAdmin({
             <Breadcrumb>
               <BreadcrumbList>
                 {breadcrumb.map((item, idx) => (
-                  <React.Fragment key={item.href}>
+                  <React.Fragment key={`${item.href}-${idx}`}>
                     <BreadcrumbItem>
                       {item.isCurrent ? (
                         <BreadcrumbPage>{item.label}</BreadcrumbPage>
