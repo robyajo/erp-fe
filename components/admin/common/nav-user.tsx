@@ -1,6 +1,7 @@
 "use client"
 
 import { useSession, signOut } from "next-auth/react"
+import { usePluginStore } from "@/stores/plugin"
 import { useRouter } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -57,6 +58,7 @@ export function NavUser() {
   const initials = getInitials(displayName)
 
   async function handleLogout() {
+    usePluginStore.getState().reset()
     sessionStorage.clear()
 
     await signOut({ callbackUrl: "/" })

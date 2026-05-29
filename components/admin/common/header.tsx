@@ -4,12 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
-import { useQuery } from "@tanstack/react-query"
-import { fetchAvailablePlugins } from "@/services/plugin"
-import { Separator } from "@/components/ui/separator"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import type { AvailablePlugin } from "@/types/plugin"
-import { useSidebar } from "@/components/ui/sidebar"
+import { usePluginStore } from "@/stores/plugin"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,9 +26,10 @@ import {
   User,
   CreditCard,
   LogOut,
-  Menu,
   ChevronDown,
 } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -51,7 +47,6 @@ export function Header() {
   const pathname = usePathname()
   const router = useRouter()
   const { data: session } = useSession()
-  const { toggleSidebar } = useSidebar()
 
   const user = session?.data?.user
   const displayName = user?.name || "User"
@@ -59,13 +54,7 @@ export function Header() {
   const avatarUrl = user?.avatarUrl || ""
   const initials = getInitials(displayName)
 
-  const { data: available } = useQuery({
-    queryKey: ["plugins"],
-    queryFn: fetchAvailablePlugins,
-    staleTime: 5 * 60 * 1000,
-  })
-
-  const installedPlugins = available?.filter((p: AvailablePlugin) => p.installed) ?? []
+  const plugins = usePluginStore((s) => s.plugins)
 
   async function handleLogout() {
     sessionStorage.clear()
@@ -73,81 +62,78 @@ export function Header() {
     toast.success("Logged out successfully")
   }
 
-  // App Launcher Items Config
-  const apps = [
+  // App Launcher Items Config — only show installed plugins
+  const allApps = [
     {
       name: "dashboard",
       label: "Dashboard",
       href: "/dashboard",
       icon: <Gauge className="h-6 w-6 text-orange-500" />,
+      requiresPlugin: null,
     },
     {
       name: "inventory",
       label: "Inventory",
       href: "/inventory",
       icon: <Warehouse className="h-6 w-6 text-blue-500" />,
+      requiresPlugin: "inventory",
     },
     {
       name: "blog",
       label: "Website",
       href: "/blog",
       icon: <Globe className="h-6 w-6 text-indigo-500" />,
+      requiresPlugin: "blog",
     },
     {
       name: "plugins",
       label: "Plugins",
       href: "/plugins",
       icon: <Puzzle className="h-6 w-6 text-pink-500" />,
+      requiresPlugin: null,
     },
     {
       name: "settings",
       label: "Settings",
       href: "/settings",
       icon: <Settings className="h-6 w-6 text-blue-600" />,
+      requiresPlugin: null,
     },
   ]
 
+  const store = usePluginStore.getState()
+  const apps = allApps.filter(
+    (app) => app.requiresPlugin === null || store.isInstalled(app.requiresPlugin),
+  )
+
   // Detect current active module
-  const isDashboard = pathname.startsWith("/dashboard")
   const isInventory = pathname.startsWith("/inventory")
   const isBlog = pathname.startsWith("/blog")
   const isContacts = pathname.startsWith("/contacts")
   const isPlugins = pathname.startsWith("/plugins")
   const isSettings = pathname.startsWith("/settings")
 
-  let activeTitle = "Dashboard"
-  let headerNav: { label: string; href: string; badge?: boolean }[] = []
+  const activeModule = isInventory
+    ? "inventory"
+    : isBlog
+      ? "blog"
+      : isContacts
+        ? "contacts"
+      : isSettings
+        ? "settings"
+        : null
 
-  if (isInventory) {
-    activeTitle = "Inventory"
-    headerNav = [
-      { label: "Operations", href: "/inventory/operations" },
-      { label: "Products", href: "/inventory/products" },
-      { label: "Configurations", href: "/inventory/categories" },
-      { label: "Settings", href: "/settings" },
-    ]
-  } else if (isBlog) {
-    activeTitle = "Blog"
-    headerNav = [
-      { label: "Posts", href: "/blog/posts" },
-      { label: "Categories", href: "/blog/categories" },
-    ]
-  } else if (isContacts) {
-    activeTitle = "Contacts"
-    headerNav = [
-      { label: "All Contacts", href: "/contacts" },
-      { label: "Industries", href: "/contacts/industries" },
-    ]
-  } else if (isPlugins) {
-    activeTitle = "Plugins"
-  } else if (isSettings) {
-    activeTitle = "Settings"
-  } else if (isDashboard) {
-    activeTitle = "Dashboard"
-    headerNav = [
-      { label: "Website", href: "/dashboard", badge: true },
-    ]
-  }
+  const pluginMenu = activeModule
+    ? usePluginStore.getState().getPluginMenu(activeModule)
+    : null
+
+  let activeTitle = isPlugins
+    ? "Plugins"
+    : isSettings
+      ? "Settings"
+      : "Dashboard"
+
+  const headerNav = pluginMenu?.headerNav ?? []
 
   // Active state matching helper
   const getIsActive = (itemHref: string) => {
@@ -162,24 +148,12 @@ export function Header() {
 
   const activeNavItem = headerNav.find((item) => getIsActive(item.href)) || headerNav[0]
 
-  const showSidebarTrigger = isInventory || isBlog || isContacts
-
   return (
     <header className="flex h-16 w-full shrink-0 items-center justify-between border-b bg-background px-4 z-50">
       {/* Left section: Launcher, Logo, Module Title & Nav */}
       <div className="flex items-center">
-        {/* Left inner wrapper aligned with sidebar width (224px - 16px padding = 208px) */}
+        {/* Left inner wrapper */}
         <div className="flex items-center gap-3 md:w-[208px] shrink-0">
-          {/* Mobile Sidebar Trigger (Hamburger Menu) */}
-          {showSidebarTrigger && (
-            <button
-              onClick={toggleSidebar}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors outline-none cursor-pointer md:hidden"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-          )}
-
           {/* Launcher Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -227,18 +201,6 @@ export function Header() {
             <nav className="flex items-center gap-1.5 ml-3">
               {headerNav.map((item) => {
                 const isActive = getIsActive(item.href)
-
-                if (item.badge) {
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-400"
-                    >
-                      {item.label}
-                    </Link>
-                  )
-                }
 
                 return (
                   <Link
@@ -302,20 +264,22 @@ export function Header() {
             }
           />
           <DropdownMenuContent className="w-56" align="end" sideOffset={8}>
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="size-8">
-                  <AvatarImage src={avatarUrl} alt={displayName} />
-                  <AvatarFallback className="bg-zinc-800 text-white font-semibold text-xs">
-                    {initials || "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-xs leading-tight">
-                  <span className="truncate font-semibold">{displayName}</span>
-                  <span className="truncate text-muted-foreground">{email}</span>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <Avatar className="size-8">
+                    <AvatarImage src={avatarUrl} alt={displayName} />
+                    <AvatarFallback className="bg-zinc-800 text-white font-semibold text-xs">
+                      {initials || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-xs leading-tight">
+                    <span className="truncate font-semibold">{displayName}</span>
+                    <span className="truncate text-muted-foreground">{email}</span>
+                  </div>
                 </div>
-              </div>
-            </DropdownMenuLabel>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={() => router.push("/dashboard/account")} className="cursor-pointer">

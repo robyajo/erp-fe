@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
 import ButtonGoogle from "./button-google"
 import Link from "next/link"
+import { usePluginStore } from "@/stores/plugin"
 
 export function SignupForm({
   className,
@@ -58,6 +59,7 @@ export function SignupForm({
           return
         }
 
+        usePluginStore.getState().reset()
         sessionStorage.clear()
 
         toast.success("Account created successfully! Please verify your email.")

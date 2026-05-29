@@ -20,6 +20,7 @@ import { SigninInput, signinSchema } from "./auth"
 import { toast } from "sonner"
 import Link from "next/link"
 import ButtonGoogle from "./button-google"
+import { usePluginStore } from "@/stores/plugin"
 
 export function SigninForm({
   className,
@@ -48,6 +49,8 @@ export function SigninForm({
         return
       }
 
+      usePluginStore.getState().reset()
+      sessionStorage.clear()
       toast.success("Welcome back!")
       router.push("/dashboard")
       router.refresh()

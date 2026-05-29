@@ -1,11 +1,7 @@
 "use client"
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import {
-  fetchAvailablePlugins,
-  installPlugin,
-  uninstallPlugin,
-} from "@/services/plugin"
+import * as React from "react"
+import { usePluginStore } from "@/stores/plugin"
 import PageContainerAdmin from "@/components/admin/page-container-admin"
 import { Button } from "@/components/ui/button"
 import {
@@ -30,44 +26,43 @@ import {
 } from "lucide-react"
 
 const iconMap: Record<string, React.ReactNode> = {
-  "package": <Box className="h-5 w-5" />,
+  package: <Box className="h-5 w-5" />,
   "file-text": <FileText className="h-5 w-5" />,
-  "users": <Users className="h-5 w-5" />,
+  users: <Users className="h-5 w-5" />,
 }
 
 export default function PluginsPage() {
-  const queryClient = useQueryClient()
+  const { plugins, loading, install, uninstall, refresh } = usePluginStore()
+  const [installing, setInstalling] = React.useState<string | null>(null)
+  const [uninstalling, setUninstalling] = React.useState<string | null>(null)
 
-  const {
-    data: available,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["plugins"],
-    queryFn: fetchAvailablePlugins,
-  })
+  React.useEffect(() => {
+    usePluginStore.getState().init()
+  }, [])
 
-  const installMut = useMutation({
-    mutationFn: installPlugin,
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: ["plugins"] })
-      toast.success(res.message || "Plugin installed")
-    },
-    onError: (err: any) => {
+  const handleInstall = async (name: string) => {
+    setInstalling(name)
+    try {
+      const msg = await install(name)
+      toast.success(msg)
+    } catch (err: any) {
       toast.error(err?.response?.data?.message || err?.message || "Install failed")
-    },
-  })
+    } finally {
+      setInstalling(null)
+    }
+  }
 
-  const uninstallMut = useMutation({
-    mutationFn: uninstallPlugin,
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: ["plugins"] })
-      toast.success(res.message || "Plugin uninstalled")
-    },
-    onError: (err: any) => {
+  const handleUninstall = async (name: string) => {
+    setUninstalling(name)
+    try {
+      const msg = await uninstall(name)
+      toast.success(msg)
+    } catch (err: any) {
       toast.error(err?.response?.data?.message || err?.message || "Uninstall failed")
-    },
-  })
+    } finally {
+      setUninstalling(null)
+    }
+  }
 
   return (
     <PageContainerAdmin
@@ -84,30 +79,27 @@ export default function PluginsPage() {
               Install and manage ERP plugins
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
+          <Button variant="outline" size="sm" onClick={refresh}>
             <RefreshCw className="mr-1 h-3 w-3" />
             Refresh
           </Button>
         </div>
 
-        {isLoading ? (
+        {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {available?.map((plugin) => {
-              const pending =
-                installMut.isPending || uninstallMut.isPending
+            {plugins.map((plugin) => {
+              const isInstalling = installing === plugin.name
+              const isUninstalling = uninstalling === plugin.name
+              const pending = isInstalling || isUninstalling
 
               return (
                 <Card
                   key={plugin.name}
-                  className={`transition-all ${
-                    plugin.installed
-                      ? "border-primary/40 ring-1 ring-primary/10"
-                      : ""
-                  }`}
+                  className={`transition-all ${plugin.installed ? "border-primary/40 ring-1 ring-primary/10" : ""}`}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
@@ -143,10 +135,7 @@ export default function PluginsPage() {
                   <CardContent className="pb-3">
                     <div className="flex items-center gap-2">
                       {plugin.installed ? (
-                        <Badge
-                          variant="default"
-                          className="bg-green-600 hover:bg-green-600"
-                        >
+                        <Badge variant="default" className="bg-green-600 hover:bg-green-600">
                           <CheckCircle className="mr-1 h-3 w-3" />
                           Installed
                         </Badge>
@@ -166,9 +155,9 @@ export default function PluginsPage() {
                         size="sm"
                         className="w-full text-red-500 hover:text-red-600 hover:border-red-200"
                         disabled={pending}
-                        onClick={() => uninstallMut.mutate(plugin.name)}
+                        onClick={() => handleUninstall(plugin.name)}
                       >
-                        {uninstallMut.isPending ? (
+                        {isUninstalling ? (
                           <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                         ) : null}
                         Uninstall
@@ -178,9 +167,9 @@ export default function PluginsPage() {
                         size="sm"
                         className="w-full"
                         disabled={pending}
-                        onClick={() => installMut.mutate(plugin.name)}
+                        onClick={() => handleInstall(plugin.name)}
                       >
-                        {installMut.isPending ? (
+                        {isInstalling ? (
                           <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                         ) : null}
                         Install
@@ -193,14 +182,11 @@ export default function PluginsPage() {
           </div>
         )}
 
-        {!isLoading && (
+        {!loading && (
           <div className="flex items-center justify-center gap-2 rounded-lg border border-dashed px-6 py-4 text-sm text-muted-foreground">
             <Puzzle className="h-4 w-4" />
-            {available?.filter((p) => p.installed).length ?? 0} plugin
-            {(available?.filter((p) => p.installed).length ?? 0) !== 1
-              ? "s"
-              : ""}{" "}
-            installed · {available?.length ?? 0} available
+            {plugins.filter((p) => p.installed).length} plugin
+            {plugins.filter((p) => p.installed).length !== 1 ? "s" : ""} installed · {plugins.length} available
           </div>
         )}
       </div>

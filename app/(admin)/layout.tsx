@@ -1,9 +1,9 @@
 "use client"
 
-import { usePathname } from "next/navigation"
-import { AppSidebar } from "@/components/admin/common/app-sidebar"
-import { SidebarProvider } from "@/components/ui/sidebar"
+import * as React from "react"
+import { usePathname, useRouter } from "next/navigation"
 import { Header } from "@/components/admin/common/header"
+import { usePluginStore } from "@/stores/plugin"
 
 export default function AdminLayout({
   children,
@@ -11,25 +11,31 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const init = usePluginStore((s) => s.init)
+  const plugins = usePluginStore((s) => s.plugins)
+  const loading = usePluginStore((s) => s.loading)
+  const initialized = usePluginStore((s) => s.initialized)
 
-  // Sidebar is only shown for inventory, blog, and contacts pages
-  const showSidebar =
-    pathname.startsWith("/inventory") ||
-    pathname.startsWith("/blog") ||
-    pathname.startsWith("/contacts")
+  React.useEffect(() => {
+    init()
+  }, [init])
+
+  React.useEffect(() => {
+    if (!initialized || loading) return
+
+    const hasPlugin = plugins.some((p) => p.installed)
+    const isAllowed = pathname === "/plugins" || pathname === "/settings"
+
+    if (!hasPlugin && !isAllowed) {
+      router.replace("/plugins")
+    }
+  }, [initialized, loading, plugins, pathname, router])
 
   return (
-    <SidebarProvider>
-      <div className="flex flex-col h-screen w-screen overflow-hidden bg-background">
-        {/* Global Top Header */}
-        <Header />
-
-        {/* Main layout split area */}
-        <div className="flex flex-1 overflow-hidden">
-          {showSidebar && <AppSidebar />}
-          {children}
-        </div>
-      </div>
-    </SidebarProvider>
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-background">
+      <Header />
+      <main className="flex flex-1 overflow-hidden">{children}</main>
+    </div>
   )
 }

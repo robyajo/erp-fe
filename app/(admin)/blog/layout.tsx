@@ -12,7 +12,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
 
-export default function InventoryLayout({
+export default function BlogLayout({
   children,
 }: {
   children: React.ReactNode
@@ -20,12 +20,11 @@ export default function InventoryLayout({
   const pathname = usePathname()
   const [open, setOpen] = React.useState(false)
 
-  const tab = getActiveTab("inventory", pathname) ?? ""
-  const sections = getSidebarSections("inventory", tab)
+  const tab = getActiveTab("blog", pathname) ?? ""
+  const sections = getSidebarSections("blog", tab)
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      {/* Mobile trigger */}
       <div className="fixed left-4 top-20 z-50 md:hidden">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger
@@ -68,7 +67,6 @@ export default function InventoryLayout({
         </Sheet>
       </div>
 
-      {/* Desktop sidebar */}
       {sections && (
         <aside className="hidden w-56 shrink-0 border-r bg-background md:block">
           <div

@@ -1,7 +1,6 @@
 "use client"
 
 import React from "react"
-import { SidebarInset } from "../ui/sidebar"
 import { Separator } from "../ui/separator"
 import {
   Breadcrumb,
@@ -201,8 +200,7 @@ export default function PageContainerAdmin({
 
   return (
     <>
-      <SidebarInset>
-        <div className="flex flex-1 flex-col gap-4 p-6 pt-6">
+      <div className="flex flex-1 flex-col gap-4 p-6 pt-6">
           {breadcrumb && breadcrumb.length > 0 && (
             <Breadcrumb>
               <BreadcrumbList>
@@ -273,7 +271,6 @@ export default function PageContainerAdmin({
 
           {children}
         </div>
-      </SidebarInset>
     </>
   )
 }

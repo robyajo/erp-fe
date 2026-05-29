@@ -10,3 +10,29 @@
 [2026-05-29 02:10] DONE Updated redirect flows — Manual signup → /verify-email, Google OAuth → /dashboard
 [2026-05-29 03:00] DONE Added token refresh in NextAuth jwt callback — Calls /api/v1/refresh 5min before expiry, new token valid 24h
 [2026-05-29 04:00] DONE Added 10s countdown auto-redirect to dashboard on email verification success
+
+[2026-06-01 07:00] DONE Created plugin types, services, and management page — /plugins with install/uninstall cards
+[2026-06-01 07:30] DONE Created Inventory FE pages — Products, Categories, Warehouses, Operations tables
+[2026-06-01 08:00] DONE Created Blog & Contacts FE pages — Posts table, Partners table with type badges
+[2026-06-01 08:30] DONE Dynamic sidebar — Shows installed plugins via NavMain, default: Plugins + Settings only
+[2026-06-01 09:00] DONE Breadcrumb moved to header bar — PageContainerAdmin with title + headerNav tabs
+[2026-06-01 09:30] DONE Created ConfigMenu app switcher — Grid launcher showing Dashboard + installed plugins
+[2026-06-01 10:00] DONE Created menu-plan.md — Navigation architecture document
+[2026-06-01 10:30] DONE Installed Zustand — Created plugin store with init/refresh/install/uninstall/reset
+[2026-06-01 11:00] DONE Zustand plugin store in admin layout init() — Components read from store instead of useQuery
+[2026-06-01 11:30] DONE Plugin store reset on login/register/logout — signin/signup/button-google/nav-user reset store
+[2026-06-01 12:00] DONE New user redirect to /plugins — Admin layout redirects if no plugins installed
+[2026-06-01 12:30] DONE App switcher shows only installed plugins — Filters by user_plugin table
+[2026-06-01 13:00] DONE Header app launcher filters by installed plugins — Inventory/Blog hidden if not installed
+[2026-06-01 13:30] DONE Plugin-specific sidebar — Each module has own sections (Operations, Content, Contacts)
+[2026-06-01 14:00] DONE Sidebar hierarchy — Receipts > List/New Receipt, Transfers > Receipts/Deliveries, Adjustments > Quantities/Scraps
+[2026-06-01 14:30] DONE Fixed Base UI DropdownMenuLabel errors — Wrapped labels in DropdownMenuGroup
+
+[2026-06-02 07:00] DONE Created menu-plugins static config — header.ts, sidebar.ts, icons.tsx, index.ts per plugin
+[2026-06-02 07:30] DONE Created settings pages — Roles, Companies, Teams, Users, Custom Fields, Activity tables
+[2026-06-02 08:00] DONE Removed shadcn sidebar — Replaced with custom sidebar (desktop: <aside>, mobile: Sheet)
+[2026-06-02 08:30] DONE Sidebar per-plugin layout — inventory/layout.tsx, blog/layout.tsx, contacts/layout.tsx
+[2026-06-02 09:00] DONE Removed SidebarProvider dependency — ConfigMenu uses window.innerWidth instead of useSidebar
+[2026-06-02 09:30] DONE Fixed <button> inside <button> error — SheetTrigger uses render prop pattern
+[2026-06-02 10:00] DONE Sidebar always renders ConfigMenu — Visible on all admin pages, menu items only on plugin pages
+[2026-06-02 10:30] DONE Updated layout-plugin.md — Added plugin menu system docs to frontend-architect skill

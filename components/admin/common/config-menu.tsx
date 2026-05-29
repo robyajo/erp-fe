@@ -2,8 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useQuery } from "@tanstack/react-query"
-import { fetchAvailablePlugins } from "@/services/plugin"
+import { usePluginStore } from "@/stores/plugin"
 import type { AvailablePlugin } from "@/types/plugin"
 import {
   DropdownMenu,
@@ -22,16 +21,15 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar"
 import {
   ChevronsUpDownIcon,
   PlusIcon,
-  LayoutDashboard,
   Package,
   FileText,
   Users,
   Puzzle,
+  Settings,
 } from "lucide-react"
 
 const appConfigMap: Record<
@@ -70,32 +68,28 @@ const getAppConfig = (name: string, label: string) => {
   }
 }
 
-const dashboardConfig = {
-  label: "Dashboard",
-  href: "/dashboard",
-  icon: <LayoutDashboard className="size-5 transition-transform duration-200 group-hover:scale-110" />,
-  colorClass: "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-900/30",
-}
+const defaultTeams = [
+  { name: "Mitunierp", logo: <Puzzle className="size-4" />, plan: "ERP" },
+]
 
 export function ConfigMenu({
   teams,
 }: {
-  teams: {
-    name: string
-    logo: React.ReactNode
-    plan: string
-  }[]
+  teams?: { name: string; logo: React.ReactNode; plan: string }[]
 }) {
-  const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
+  const [isMobile, setIsMobile] = React.useState(false)
+  React.useEffect(() => {
+    setIsMobile(window.innerWidth < 768)
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
-  const { data: available } = useQuery({
-    queryKey: ["plugins"],
-    queryFn: fetchAvailablePlugins,
-    staleTime: 5 * 60 * 1000,
-  })
+  const resolvedTeams = teams ?? defaultTeams
+  const [activeTeam, setActiveTeam] = React.useState(resolvedTeams[0])
 
-  const installedPlugins = available?.filter((p: AvailablePlugin) => p.installed) ?? []
+  const plugins = usePluginStore((s) => s.plugins)
+  const installedPlugins = plugins.filter((p) => p.installed)
 
   if (!activeTeam) {
     return null
@@ -138,21 +132,8 @@ export function ConfigMenu({
               </span>
             </div>
 
-            {/* Grid of Apps */}
+            {/* Grid of Apps — installed plugins + Plugins/Settings always */}
             <div className="grid grid-cols-3 gap-2">
-              {/* Dashboard */}
-              <Link
-                href="/dashboard"
-                className="group flex flex-col items-center justify-center p-2 rounded-xl hover:bg-accent transition-all text-center"
-              >
-                <div className="flex size-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-all duration-200 group-hover:scale-105 group-hover:shadow-sm dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-900/30">
-                  {dashboardConfig.icon}
-                </div>
-                <span className="mt-1 text-[11px] font-medium text-foreground truncate w-full">
-                  {dashboardConfig.label}
-                </span>
-              </Link>
-
               {/* Installed Plugins */}
               {installedPlugins.map((plugin: AvailablePlugin) => {
                 const config = getAppConfig(plugin.name, plugin.label)
@@ -171,6 +152,32 @@ export function ConfigMenu({
                   </Link>
                 )
               })}
+
+              {/* Plugins (always visible) */}
+              <Link
+                href="/plugins"
+                className="group flex flex-col items-center justify-center p-2 rounded-xl hover:bg-accent transition-all text-center"
+              >
+                <div className="flex size-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600 transition-all duration-200 group-hover:scale-105 group-hover:shadow-sm dark:bg-violet-950/40 dark:text-violet-400 border border-violet-100/50 dark:border-violet-900/30">
+                  <Puzzle className="size-5 transition-transform duration-200 group-hover:scale-110" />
+                </div>
+                <span className="mt-1 text-[11px] font-medium text-foreground truncate w-full">
+                  Plugins
+                </span>
+              </Link>
+
+              {/* Settings (always visible) */}
+              <Link
+                href="/settings"
+                className="group flex flex-col items-center justify-center p-2 rounded-xl hover:bg-accent transition-all text-center"
+              >
+                <div className="flex size-11 items-center justify-center rounded-xl bg-gray-50 text-gray-600 transition-all duration-200 group-hover:scale-105 group-hover:shadow-sm dark:bg-gray-950/40 dark:text-gray-400 border border-gray-100/50 dark:border-gray-900/30">
+                  <Settings className="size-5 transition-transform duration-200 group-hover:scale-110" />
+                </div>
+                <span className="mt-1 text-[11px] font-medium text-foreground truncate w-full">
+                  Settings
+                </span>
+              </Link>
             </div>
 
             <DropdownMenuSeparator className="my-2" />
@@ -199,7 +206,7 @@ export function ConfigMenu({
                       Available Teams
                     </DropdownMenuLabel>
                   </DropdownMenuGroup>
-                  {teams.map((team, index) => (
+                  {resolvedTeams.map((team, index) => (
                     <DropdownMenuItem
                       key={team.name}
                       onClick={() => setActiveTeam(team)}
