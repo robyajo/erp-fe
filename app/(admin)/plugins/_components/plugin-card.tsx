@@ -1,6 +1,6 @@
 "use client"
 
-import type { UnifiedPlugin } from "../page"
+import type { UnifiedPlugin } from "./v-page"
 import { Card } from "@/components/ui/card"
 import {
   DropdownMenu,

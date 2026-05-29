@@ -1,6 +1,6 @@
 "use client"
 
-import type { UnifiedPlugin } from "../page"
+import type { UnifiedPlugin } from "./v-page"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
